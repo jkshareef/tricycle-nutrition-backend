@@ -1,0 +1,2 @@
+class MealFoodItem < ApplicationRecord
+end

@@ -7,6 +7,6 @@ class Api::V1::CompoundsController < ApplicationController
     private
 
     def compound_params
-        params.require(:compound)
+        params.require(:compound).permit(:name, :nutrient_id, :description)
     end
 end

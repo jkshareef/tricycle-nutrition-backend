@@ -10,15 +10,22 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_07_17_225246) do
+ActiveRecord::Schema.define(version: 2019_07_18_005645) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "compounds", force: :cascade do |t|
     t.string "name"
-    t.integer "food_data_id"
+    t.integer "nutrient_id"
     t.string "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "food_item_compounds", force: :cascade do |t|
+    t.integer "food_item_id"
+    t.integer "compound_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -26,6 +33,13 @@ ActiveRecord::Schema.define(version: 2019_07_17_225246) do
   create_table "food_items", force: :cascade do |t|
     t.string "name"
     t.integer "food_data_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "meal_food_items", force: :cascade do |t|
+    t.integer "meal_id"
+    t.integer "food_item_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

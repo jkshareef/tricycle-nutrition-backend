@@ -4,8 +4,8 @@ Rails.application.routes.draw do
     namespace :v1 do
       resources :users, only: [:create]
       resources :meals, only: [:create, :edit]
-      resources :food_items, only: [:create]
-      resources :compounds, only: [:show]
+      resources :food_items, only: [:create, :show]
+      resources :compounds, only: [:create, :show]
       resources :meal_types, only: [:show]
       post '/login', to: 'auth#create'
       get '/profile', to: 'users#profile'
