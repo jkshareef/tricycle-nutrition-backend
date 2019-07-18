@@ -1,0 +1,2 @@
+class Compound < ApplicationRecord
+end
