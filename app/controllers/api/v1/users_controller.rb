@@ -16,6 +16,16 @@ class Api::V1::UsersController < ApplicationController
         end
     end
 
+    def update
+        @user = User.find(current_user.id)
+        if @user.update(user_params)
+            render json: {user: UserSerializer.new(@user)}, status: :accepted
+        else
+            render json: {error: 'failed to update user'}, status: :not_acceptable
+        end
+
+    end
+
 
     private
 
