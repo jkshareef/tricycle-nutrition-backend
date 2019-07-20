@@ -3,11 +3,11 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       resources :users, only: [:create, :update]
-      resources :meals, only: [:create, :show, :update, :delete]
+      resources :meals, only: [:create, :show, :update, :destroy]
       resources :food_items, only: [:create, :show]
       resources :compounds, only: [:create, :show]
       resources :meal_types, only: [:show]
-      resources :meal_food_items, only: [:create, :update, :delete]
+      resources :meal_food_items, only: [:create, :update, :destroy]
       resources :food_item_compounds, only: [:create]
       post '/login', to: 'auth#create'
       get '/profile', to: 'users#profile'

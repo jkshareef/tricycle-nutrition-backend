@@ -18,7 +18,7 @@ class Api::V1::MealFoodItemsController < ApplicationController
 
     end
 
-    def delete
+    def destroy
     end
 
 

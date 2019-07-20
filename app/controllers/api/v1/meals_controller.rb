@@ -15,7 +15,7 @@ class Api::V1::MealsController < ApplicationController
             render json: {error: 'failed to update meal'}, status: :not_acceptable
     end
 
-    def delete
+    def destroy
     end
 
     
