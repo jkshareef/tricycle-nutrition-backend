@@ -11,7 +11,8 @@ Rails.application.routes.draw do
       resources :food_item_compounds, only: [:create]
       post '/login', to: 'auth#create'
       get '/profile', to: 'users#profile'
-      get '/food', to: 'meals#get_food'
+      get '/food/:date', to: 'meals#get_food'
+      post '/add/:query', to: 'meals#add_food'
     end
   end
 end
