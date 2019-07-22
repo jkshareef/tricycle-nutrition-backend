@@ -1,3 +1,6 @@
+require 'rest-client'
+
+
 class Api::V1::MealsController < ApplicationController
 
     def create
@@ -42,27 +45,27 @@ class Api::V1::MealsController < ApplicationController
     # end
 
     def get_food
-        hash = {}
+        hash = {data: {}, day: {}}
        if current_user.meals
-            if meals = Meal.where(user_id: current_user.id, date: params[:date])
-                meals.map do |meal|
-                
-                meal.meal_food_items.map do |meal_food_item|
-                    meal_food_item.food_item.food_item_compounds.map do |food_item_compound|
-                            if hash.has_key?(food_item_compound.compound.name)
-                                byebug
-                                hash[food_item_compound.compound.name] += food_item_compound.amount_mg
-                            else
-                                hash[food_item_compound.compound.name] = food_item_compound.amount_mg
-                            end
-                        end
+        all_meals = Meal.where(user_id: current_user.id)
+        hash[:day] = all_meals.min_by {|meal| Time.now.to_i - Time.new(meal.date).to_i}.date.split(' ')[0]
+        all_meals.group_by{|meal| Time.now.to_i - Time.new(meal.date).to_i}
+        meals = all_meals.group_by{|meal| Time.now.to_i - Time.new(meal.date).to_i}.min.last
+        
+        meals.map do |meal|
+        meal.meal_food_items.map do |meal_food_item|
+            meal_food_item.food_item.food_item_compounds.map do |food_item_compound|
+                    if hash[:data].has_key?(food_item_compound.compound.name)
+                        hash[:data][food_item_compound.compound.name][:amount] += food_item_compound.amount_mg
+                    else
+                        hash[:data][food_item_compound.compound.name][:amount] = food_item_compound.amount_mg
+                        hash[:data][food_item_compound.compound.name][:rdv] = food_item_compound.amount_mg
+                        hash[:data][food_item_compound.compound.name][:description] = food_item_compound.amount_mg
                     end
                 end
-            render json: hash, status: :accepted      
-            else
-                render json: {error: 'failed to fetch food items'}, status: :not_acceptable
-            end
-        
+            end  
+        end
+        render json: hash, status: :accepted   
         else
             render json: {error: 'User has no meals'}, status: :not_acceptable
         end
@@ -70,15 +73,14 @@ class Api::V1::MealsController < ApplicationController
 
     def add_food
         
-        response = HTTP.headers({'Content-Type': 'application/json'}).post('https://s79QvmRfTlZsfJLRNGFXVpxRTuozyCnoFrmqMtSJ
-            @api.nal.usda.gov/fdc/v1/search', :body => params[:query])
-        
+        # response = HTTP.headers('Content-Type' => 'application/json').post('https://s79QvmRfTlZsfJLRNGFXVpxRTuozyCnoFrmqMtSJ@api.nal.usda.gov/fdc/v1/search', :json => {'generalSearchInput' => params[:query]})
+        response = RestClient.post 'https://s79QvmRfTlZsfJLRNGFXVpxRTuozyCnoFrmqMtSJ@api.nal.usda.gov/fdc/v1/search', {'generalSearchInput' => params[:query]}.to_json, {content_type: :json, accept: :json}
         byebug
         food_id = response.body.foods[0].fdcId
         food_name = response.body.foods[0].description
 
-        nutrient_response = HTTP.headers(:accept => 'application/json')
-        .get("https://s79QvmRfTlZsfJLRNGFXVpxRTuozyCnoFrmqMtSJ@api.nal.usda.gov/fdc/v1/#{food_id}")
+        # nutrient_response = HTTP.headers('Content-Type' => 'application/json').get("https://s79QvmRfTlZsfJLRNGFXVpxRTuozyCnoFrmqMtSJ@api.nal.usda.gov/fdc/v1/#{food_id}")
+        nutrient_response = RestClient.get "https://s79QvmRfTlZsfJLRNGFXVpxRTuozyCnoFrmqMtSJ@api.nal.usda.gov/fdc/v1/#{food_id}", {content_type: :json, accept: :json}
 
         @meal = current_user.meals.create(date: Time.now.to_s.split(' ')[0])
         @food_item = FoodItem.create(name: food_name, food_data_id: food_id)

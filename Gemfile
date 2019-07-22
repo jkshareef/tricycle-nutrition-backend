@@ -50,3 +50,5 @@ gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 gem "jwt", "~> 2.2"
 
 gem "faker", "~> 1.9"
+
+gem 'rest-client', '~> 2.0', '>= 2.0.2'
