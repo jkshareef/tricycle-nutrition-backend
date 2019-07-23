@@ -15,31 +15,32 @@ FoodItemCompound.destroy_all
 
 
 def seed_compounds
-    Compound.create(name: "protein", nutrient_id:1003, description: "for muscles" rdv_mg: )
-    Compound.create(name: "fiber", nutrient_id:1079 , description:"for digestive", rdv_mg:)
-    Compound.create(name: "calcium", nutrient_id:1087, description:"for bones", rdv_mg: )
-    Compound.create(name: "iron", nutrient_id:1089, description:"for blood", rdv_mg: 15)
-    Compound.create(name: "magnesium", nutrient_id:1090, description: "", rdv_mg:)
-    Compound.create(name: "manganese", nutrient_id:1101, description: "", rdv_mg:)
-    Compound.create(name: "phosphorus", nutrient_id:1091, description:"", rdv_mg:)
-    Compound.create(name: "potassium", nutrient_id:1092, description:"", rdv_mg:)
-    Compound.create(name: "sodium", nutrient_id:1093, description:"", rdv_mg:)
-    Compound.create(name: "zinc", nutrient_id:1095, description: "", rdv_mg:)
-    Compound.create(name: "copper", nutrient_id:1098, description:"", rdv_mg:)
-    Compound.create(name: "selenium", nutrient_id:1103, description:"", rdv_mg:)
-    Compound.create(name: "vitamin_a", nutrient_id:1106, description:"", rdv_mg:)
-    Compound.create(name: "vitamin_e", nutrient_id:1109, description:"", rdv_mg:)
-    Compound.create(name: "vitamin_d", nutrient_id:1114, description:"for bones", rdv_mg: )
-    Compound.create(name: "vitamin_c", nutrient_id:1162, description:"for immune", rdv_mg: )
-    Compound.create(name: "thiamin", nutrient_id:1165, description:"", rdv_mg: )
-    Compound.create(name: "riboflavin", nutrient_id:1166, description:"", rdv_mg: )
-    Compound.create(name: "niacin", nutrient_id:1167, description:"", rdv_mg: )
-    Compound.create(name: "vitamin_b5", nutrient_id:1170, description:"", rdv_mg: )
-    Compound.create(name: "vitamin_b6", nutrient_id:1175, description:"", rdv_mg: )
-    Compound.create(name: "vitamin_b12", nutrient_id:1178, description:"", rdv_mg: )
-    Compound.create(name: "choline", nutrient_id:1180, description:"", rdv_mg: )
-    Compound.create(name: "vitamin_k", nutrient_id:1185, description:"", rdv_mg: )
-    Compound.create(name: "folate", nutrient_id:1177, description:"", rdv_mg: )
+    Compound.create(name: "protein", nutrient_id:1003, description: "for muscles", rdv_mg: 20000 )
+    Compound.create(name: "fiber, total dietary", nutrient_id:1079 , description:"for digestive", rdv_mg: nil)
+    Compound.create(name: "calcium, ca", nutrient_id:1087, description:"for bones", rdv_mg: nil)
+    Compound.create(name: "iron, fe", nutrient_id:1089, description:"for blood", rdv_mg: 15)
+    Compound.create(name: "magnesium, mg", nutrient_id:1090, description: "", rdv_mg:nil)
+    Compound.create(name: "manganese, mn", nutrient_id:1101, description: "", rdv_mg:nil)
+    Compound.create(name: "phosphorus, p", nutrient_id:1091, description:"", rdv_mg:nil)
+    Compound.create(name: "potassium, k", nutrient_id:1092, description:"", rdv_mg:nil)
+    Compound.create(name: "sodium, na", nutrient_id:1093, description:"", rdv_mg:nil)
+    Compound.create(name: "zinc, sn", nutrient_id:1095, description: "", rdv_mg:nil)
+    Compound.create(name: "copper, cu", nutrient_id:1098, description:"", rdv_mg:nil)
+    Compound.create(name: "selenium, se", nutrient_id:1103, description:"", rdv_mg:nil)
+    Compound.create(name: "vitamin a, iu", nutrient_id:1106, description:"", rdv_mg:nil)
+    Compound.create(name: "vitamin a, rae", nutrient_id:1106, description:"", rdv_mg:nil)
+    Compound.create(name: "vitamin e (alpha-tocopherol)", nutrient_id:1109, description:"", rdv_mg:nil)
+    Compound.create(name: "vitamin d (d2 + d3)", nutrient_id:1114, description:"for bones", rdv_mg: nil)
+    Compound.create(name: "vitamin c, ascorbic acid", nutrient_id:1162, description:"for immune", rdv_mg: nil )
+    Compound.create(name: "thiamin", nutrient_id:1165, description:"", rdv_mg:nil )
+    Compound.create(name: "riboflavin", nutrient_id:1166, description:"", rdv_mg: nil )
+    Compound.create(name: "niacin", nutrient_id:1167, description:"", rdv_mg: nil )
+    Compound.create(name: "vitamin b-5", nutrient_id:1170, description:"", rdv_mg: nil)
+    Compound.create(name: "vitamin b-6", nutrient_id:1175, description:"", rdv_mg: nil)
+    Compound.create(name: "vitamin b12", nutrient_id:1178, description:"", rdv_mg: nil)
+    Compound.create(name: "choline", nutrient_id:1180, description:"", rdv_mg: nil)
+    Compound.create(name: "vitamin k (phylloquinone)", nutrient_id:1185, description:"", rdv_mg: nil )
+    Compound.create(name: "folate, total", nutrient_id:1177, description:"", rdv_mg: nil)
 end
 
 def seed_food_items
@@ -52,7 +53,8 @@ def seed_food_items
 end
 
 def seed_meals
-jamal = User.create(name: "Jamal Shareef", username: "jshareef", password: "winston")
+jamal = User.create(name: "Jamal Shareef", username: "Jshareef", password: "1234")
+kendall = User.create(name: "Kendall Shareef", username: "Kshareef", password: "1234")
 jamal.meals.create([
     {date: Time.now},
     {date: Time.now},

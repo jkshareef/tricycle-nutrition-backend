@@ -58,9 +58,15 @@ class Api::V1::MealsController < ApplicationController
                     if hash[:data].has_key?(food_item_compound.compound.name)
                         hash[:data][food_item_compound.compound.name][:amount] += food_item_compound.amount_mg
                     else
-                        hash[:data][food_item_compound.compound.name][:amount] = food_item_compound.amount_mg
-                        hash[:data][food_item_compound.compound.name][:rdv] = food_item_compound.amount_mg
-                        hash[:data][food_item_compound.compound.name][:description] = food_item_compound.amount_mg
+                        
+                        add_hash = {food_item_compound.compound.name => {:name => food_item_compound.compound.name, 
+                            :amount => food_item_compound.amount_mg, :rdv =>food_item_compound.compound.rdv_mg, 
+                            :description => food_item_compound.compound.description }}
+                        hash[:data].merge!(add_hash)
+                        
+                        # hash[:data][food_item_compound.compound.name][:amount] = food_item_compound.amount_mg
+                        # hash[:data][food_item_compound.compound.name][:rdv] = food_item_compound.compound.rdv_mg
+                        # hash[:data][food_item_compound.compound.name][:description] = food_item_compound.compound.description
                     end
                 end
             end  
@@ -75,9 +81,22 @@ class Api::V1::MealsController < ApplicationController
         
         # response = HTTP.headers('Content-Type' => 'application/json').post('https://s79QvmRfTlZsfJLRNGFXVpxRTuozyCnoFrmqMtSJ@api.nal.usda.gov/fdc/v1/search', :json => {'generalSearchInput' => params[:query]})
         response = RestClient.post 'https://s79QvmRfTlZsfJLRNGFXVpxRTuozyCnoFrmqMtSJ@api.nal.usda.gov/fdc/v1/search', {'generalSearchInput' => params[:query]}.to_json, {content_type: :json, accept: :json}
-        byebug
-        food_id = response.body.foods[0].fdcId
-        food_name = response.body.foods[0].description
+        
+        render json: {message: 'Success'}, status: :accepted
+        data = JSON.parse(response.body)
+
+      
+        
+        food_id = data["foods"][0]["fdcId"]
+        food_name = data["foods"][0]["description"]
+
+        compounds = [
+            "protein", "fiber, total dietary", "calcium","iron", "iron", "manganese, mn" ,
+            "magnesium, mg", "phosphorus, p", "potassium, k", "sodium, na", "zinc, zn", "copper, cu", 
+            "selenium, se", "vitamin a, iu", "vitamin a, rae", "vitamin e (alpha-tocopherol)", "vitamin_d", "vitamin c, total ascorbic acid", 
+            "thiamin", "riboflavin", "niacin", "vitamin_b5", "vitamin b-6",
+            "vitamin_b12", "choline", "vitamin k (phylloquinone)", "folate, total"]
+    
 
         # nutrient_response = HTTP.headers('Content-Type' => 'application/json').get("https://s79QvmRfTlZsfJLRNGFXVpxRTuozyCnoFrmqMtSJ@api.nal.usda.gov/fdc/v1/#{food_id}")
         nutrient_response = RestClient.get "https://s79QvmRfTlZsfJLRNGFXVpxRTuozyCnoFrmqMtSJ@api.nal.usda.gov/fdc/v1/#{food_id}", {content_type: :json, accept: :json}
@@ -86,29 +105,22 @@ class Api::V1::MealsController < ApplicationController
         @food_item = FoodItem.create(name: food_name, food_data_id: food_id)
         @meal_food_item = MealFoodItem.create(meal_id: @meal.id, food_item_id: @food_item.id)
 
-        result_array = []
-        nutrient_response.body.food_nutrients.map do |food_nutrient|
-            if compounds.include?(food_nutrient.nutrient.name.downcase)
-                name = food_nutrient.nutrient.name.downcase
-                id = food_nutrient.nutrient.id
-                amount = food_nutrient.nutrient.amount
-                result_array.push({food_nutrient.nutrient.name.downcase => food_nutrient.nutrient.amount})
+        nutrient_data = JSON.parse(nutrient_response.body)
+        # result_array = []
+        nutrient_data["foodNutrients"].map do |food_nutrient|
+                name = food_nutrient["nutrient"]["name"].downcase
+                id = food_nutrient["nutrient"]["id"]
+                amount = food_nutrient["amount"]
+                # result_array.push({food_nutrient.nutrient.name.downcase => food_nutrient.nutrient.amount})
                 @compound = compound_find_or_create(name, id)
                 FoodItemCompound.create(food_item_id: @food_item.id, compound_id: @compound.id, amount_mg: amount)
-            end
         end
 
-        render json: {message: 'Success'}, status: :accepted
+        
 
     end
 
-    compounds = [
-        "protein", "fiber", "calcium","iron", "iron", "manganese" ,
-        "phosphorus", "potassium", "sodium", "zinc", "copper", 
-        "selenium", "vitamin_a", "vitamin_e", "vitamin_d", "vitamin_c", 
-        "thiamin", "riboflavin", "niacin", "vitamin_b5", "vitamin_b6",
-        "vitamin_b12", "choline", "vitamin_k", "folate"]
-
+  
     def destroy
     end
 
@@ -121,8 +133,10 @@ class Api::V1::MealsController < ApplicationController
     end
 
     def compound_find_or_create(name, id)
-        if !Compound.find_by(name: name)
-            Compound.create(name: name, nutrient_id: id)
+        if Compound.find_by(name: name)
+            @compound = Compound.find_by(name: name)
+        else
+            @compound = Compound.create(name: name, nutrient_id: id)
         end
     end
 
