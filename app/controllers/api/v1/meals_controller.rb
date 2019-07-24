@@ -45,13 +45,31 @@ class Api::V1::MealsController < ApplicationController
     # end
 
     def get_food
-        hash = {data: {}, day: {}}
+        hash = {data: {}, days: []}
        if current_user.meals
         all_meals = Meal.where(user_id: current_user.id)
-        hash[:day] = all_meals.min_by {|meal| Time.now.to_i - Time.new(meal.date).to_i}.date.split(' ')[0]
-        all_meals.group_by{|meal| Time.now.to_i - Time.new(meal.date).to_i}
-        meals = all_meals.group_by{|meal| Time.now.to_i - Time.new(meal.date).to_i}.min.last
-        
+            if params[:time] == "day"
+                hash[:days].push(all_meals.min_by {|meal| Time.now - meal.date}.date.to_s.split(' ')[0])
+                meals = all_meals.group_by{|meal| Time.now - meal.date}.min.last
+            elsif params[:time] == "week"
+                meals = all_meals.select do |meal|
+                    Time.now - meal.date <= 604800
+                end
+                meals.each do |meal|
+                    if !hash[:days].include?(meal.date.to_s.split(' ')[0])
+                        hash[:days].push(meal.date.to_s.split(' ')[0])
+                    end
+                end
+                # all_meals.group_by{|meal| Time.now.to_i - Time.new(meal.date).to_i}
+                # ending = all_meals.group_by{|meal| Time.now.to_i - Time.new(meal.date).to_i}.length
+                # beginning = ending - 6
+                # meals = all_meals.group_by{|meal| Time.now.to_i - Time.new(meal.date).to_i}.min[beginning..ending]
+            else
+                meals = all_meals.group_by{|meal| Time.now.to_i - meal.date}
+            end
+
+
+
         meals.map do |meal|
         meal.meal_food_items.map do |meal_food_item|
             meal_food_item.food_item.food_item_compounds.map do |food_item_compound|
@@ -101,7 +119,7 @@ class Api::V1::MealsController < ApplicationController
         # nutrient_response = HTTP.headers('Content-Type' => 'application/json').get("https://s79QvmRfTlZsfJLRNGFXVpxRTuozyCnoFrmqMtSJ@api.nal.usda.gov/fdc/v1/#{food_id}")
         nutrient_response = RestClient.get "https://s79QvmRfTlZsfJLRNGFXVpxRTuozyCnoFrmqMtSJ@api.nal.usda.gov/fdc/v1/#{food_id}", {content_type: :json, accept: :json}
 
-        @meal = current_user.meals.create(date: Time.now.to_s.split(' ')[0])
+        @meal = current_user.meals.create(date: Time.now)
         @food_item = FoodItem.create(name: food_name, food_data_id: food_id)
         @meal_food_item = MealFoodItem.create(meal_id: @meal.id, food_item_id: @food_item.id)
 
