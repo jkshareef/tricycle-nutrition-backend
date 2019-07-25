@@ -45,42 +45,60 @@ class Api::V1::MealsController < ApplicationController
     # end
 
     def get_food
-        hash = {data: {}, days: []}
+        hash = {total: {}, data: {}, days: [], food: []}
        if current_user.meals
         all_meals = Meal.where(user_id: current_user.id)
-            if params[:time] == "day"
+            if params[:time] == "recent"
                 hash[:days].push(all_meals.min_by {|meal| Time.now - meal.date}.date.to_s.split(' ')[0])
                 meals = all_meals.group_by{|meal| Time.now - meal.date}.min.last
+                meals[0].meal_food_items.each do |meal_food_item|
+                    hash[:food].push(meal_food_item.food_item.name)
+                    hash[:data][meal_food_item.food_item.name] = []
+                end
+                # hash[:food] = meals[0].meal_food_items[meals[0].meal_food_items.length-1].food_item.name
             elsif params[:time] == "week"
                 meals = all_meals.select do |meal|
                     Time.now - meal.date <= 604800
                 end
                 meals.each do |meal|
-                    if !hash[:days].include?(meal.date.to_s.split(' ')[0])
-                        hash[:days].push(meal.date.to_s.split(' ')[0])
+                    if !hash[:days].include?((meal.date).to_s.split(' ')[0])
+                        hash[:days].push((meal.date).to_s.split(' ')[0])
                     end
                 end
                 # all_meals.group_by{|meal| Time.now.to_i - Time.new(meal.date).to_i}
                 # ending = all_meals.group_by{|meal| Time.now.to_i - Time.new(meal.date).to_i}.length
                 # beginning = ending - 6
                 # meals = all_meals.group_by{|meal| Time.now.to_i - Time.new(meal.date).to_i}.min[beginning..ending]
+            elsif params[:time] == "day"
+                hash[:days].push(all_meals.min_by {|meal| Time.now - meal.date}.date.to_s.split(' ')[0])
+                meals = all_meals.group_by{|meal| Time.now - meal.date}.min.last
+                meals[0].meal_food_items.each do |meal_food_item|
+                    hash[:food].push(meal_food_item.food_item.name)
+                    hash[:data][meal_food_item.food_item.name] = []
+                end
+                
             else
-                meals = all_meals.group_by{|meal| Time.now.to_i - meal.date}
+                meals = all_meals.group_by{|meal| Time.now - meal.date}
             end
 
-
+           
 
         meals.map do |meal|
         meal.meal_food_items.map do |meal_food_item|
             meal_food_item.food_item.food_item_compounds.map do |food_item_compound|
-                    if hash[:data].has_key?(food_item_compound.compound.name)
-                        hash[:data][food_item_compound.compound.name][:amount] += food_item_compound.amount_mg
+                    if hash[:total].has_key?(food_item_compound.compound.name)
+                        hash[:total][food_item_compound.compound.name][:amount] += food_item_compound.amount_mg
                     else
-                        
                         add_hash = {food_item_compound.compound.name => {:name => food_item_compound.compound.name, 
                             :amount => food_item_compound.amount_mg, :rdv =>food_item_compound.compound.rdv_mg, 
                             :description => food_item_compound.compound.description }}
-                        hash[:data].merge!(add_hash)
+
+                        single_hash = {:name => food_item_compound.compound.name, 
+                            :amount => food_item_compound.amount_mg, :rdv =>food_item_compound.compound.rdv_mg, 
+                            :description => food_item_compound.compound.description }
+                        hash[:total].merge!(add_hash)
+                        hash[:data][food_item_compound.food_item.name].push(single_hash)
+                      
                         
                         # hash[:data][food_item_compound.compound.name][:amount] = food_item_compound.amount_mg
                         # hash[:data][food_item_compound.compound.name][:rdv] = food_item_compound.compound.rdv_mg

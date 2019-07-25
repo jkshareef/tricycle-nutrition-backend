@@ -144,9 +144,9 @@ jamal.meals.create([
     {date: Time.now},
     {date: Time.now},
     {date: Time.now},
-    {date: Time.now + (60*60*24)},
-    {date: Time.now + (60*60*24)},
-    {date: Time.now + (60*60*24)},
+    {date: Time.now - (60*60*24)},
+    {date: Time.now - (60*60*24)},
+    {date: Time.now - (60*60*24)},
     {date: Time.now - (2*60*60*24)},
     {date: Time.now - (2*60*60*24)},
     {date: Time.now - (2*60*60*24)}
@@ -172,6 +172,18 @@ def seed_meal_food_items
     MealFoodItem.create(meal_id:3, food_item_id:2)
     MealFoodItem.create(meal_id:3, food_item_id:1)
     MealFoodItem.create(meal_id:3, food_item_id:1)
+    MealFoodItem.create(meal_id:4, food_item_id:5)
+    MealFoodItem.create(meal_id:4, food_item_id:2)
+    MealFoodItem.create(meal_id:4, food_item_id:3)
+    MealFoodItem.create(meal_id:4, food_item_id:1)
+    MealFoodItem.create(meal_id:4, food_item_id:2)
+    MealFoodItem.create(meal_id:4, food_item_id:4)
+    MealFoodItem.create(meal_id:5, food_item_id:4)
+    MealFoodItem.create(meal_id:5, food_item_id:5)
+    MealFoodItem.create(meal_id:5, food_item_id:3)
+    MealFoodItem.create(meal_id:5, food_item_id:2)
+    MealFoodItem.create(meal_id:5, food_item_id:1)
+    MealFoodItem.create(meal_id:6, food_item_id:1)
 end
 
 def seed_food_item_compounds
@@ -179,14 +191,14 @@ def seed_food_item_compounds
     FoodItemCompound.create(food_item_id: 1, compound_id:4, amount_mg: 100)
     FoodItemCompound.create(food_item_id: 1, compound_id: 5, amount_mg:100)
     FoodItemCompound.create(food_item_id: 1, compound_id: 6, amount_mg:500)
-    FoodItemCompound.create(food_item_id: 1, compound_id: 7, amount_mg:200)
+    FoodItemCompound.create(food_item_id: 2, compound_id: 7, amount_mg:200)
     FoodItemCompound.create(food_item_id: 3, compound_id:1, amount_mg: 100)
     FoodItemCompound.create(food_item_id: 3, compound_id:2, amount_mg:50)
     FoodItemCompound.create(food_item_id: 4, compound_id:3, amount_mg:75)
     FoodItemCompound.create(food_item_id: 4, compound_id:4, amount_mg:100)
     FoodItemCompound.create(food_item_id: 4, compound_id:5, amount_mg:250)
-    FoodItemCompound.create(food_item_id: 4, compound_id:6, amount_mg:300)
-    FoodItemCompound.create(food_item_id: 4, compound_id:7, amount_mg: 210)
+    FoodItemCompound.create(food_item_id: 5, compound_id:6, amount_mg:300)
+    FoodItemCompound.create(food_item_id: 6, compound_id:7, amount_mg: 210)
 end
 
 seed_compounds
