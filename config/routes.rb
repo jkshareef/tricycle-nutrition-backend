@@ -13,6 +13,7 @@ Rails.application.routes.draw do
       get '/profile', to: 'users#profile'
       get '/food/:time', to: 'meals#get_food'
       post '/add/:query', to: 'meals#add_food'
+      get '/foodnames', to: "food_items#food_names"
     end
   end
 end
