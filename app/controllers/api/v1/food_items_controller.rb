@@ -7,6 +7,12 @@ class Api::V1::FoodItemsController < ApplicationController
             render json: {error: 'failed to create food item'}, status: :not_acceptable
     end
 
+
+   def food_names
+    food_items = FoodItem.all
+    render json: {food_item: FoodItemSerializer.new(food_items)}, status: :acceptable
+   end
+
     private
 
     def food_item_params

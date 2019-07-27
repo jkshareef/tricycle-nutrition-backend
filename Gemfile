@@ -50,3 +50,8 @@ gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 gem "jwt", "~> 2.2"
 
 gem "faker", "~> 1.9"
+
+gem 'rest-client', '~> 2.0', '>= 2.0.2'
+gem 'smarter_csv', '~> 1.2', '>= 1.2.6'
+gem 'parallel', '~> 1.17'
+
