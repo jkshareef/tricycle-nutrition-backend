@@ -49,25 +49,25 @@ class Api::V1::MealsController < ApplicationController
 
             meals.map do |meal|
                 meal.meal_food_items.map do |meal_food_item|
-                    food_hash = {meal_food_item.food_item.name => []}
+                    food_hash = {meal_food_item.id => []}
+                    byebug
                     hash[:data].push(food_hash)
                     meal_food_item.food_item.food_item_compounds.map do |food_item_compound|
                         
-                        add_hash = {:name => food_item_compound.compound.name, 
+                        add_hash = {:food => food_item_compound.food_item.name,:name => food_item_compound.compound.name, 
                             :amount => food_item_compound.amount, :rdv =>food_item_compound.compound.rdv, 
                             :description => food_item_compound.compound.description, :units => food_item_compound.compound.units}
                         if hash[:total].size > 0 && hash[:total].index {|h| h[:name] == food_item_compound.compound.name} != nil
                             idx = hash[:total].index {|h| h[:name] == food_item_compound.compound.name}
                             hash[:total][idx][:amount] += food_item_compound.amount
                             
-                            idx = hash[:data].index {|h| h.has_key?(food_item_compound.food_item.name)}
-                            hash[:data][idx][food_item_compound.food_item.name].push(add_hash)
+                            idx = hash[:data].index {|h| h.has_key?(food_item_compound.food_item.meal_food_item.id)}
+                            hash[:data][idx][food_item_compound.food_item.meal_food_item.id].push(add_hash)
                         else
-                            
-
                             hash[:total].push(add_hash)
-                            idx = hash[:data].index {|h| h.has_key?(food_item_compound.food_item.name)}
-                            hash[:data][idx][food_item_compound.food_item.name].push(add_hash)
+                            idx = hash[:data].index {|h| h.has_key?(food_item_compound.food_item.meal_food_item.id)}
+                        
+                            hash[:data][idx][food_item_compound.food_item.meal_food_item.id].push(add_hash)
                             
                         
                         end
