@@ -21,13 +21,46 @@ class Api::V1::MealsController < ApplicationController
         end
     end
 
+    def get_recent
+        hash = {data: []}
+        if current_user.meals.size != 0
+            all_meals = Meal.where(user_id: current_user.id)
+            meals = all_meals.group_by{|meal| Time.now - meal.date}.min.last
+
+            meals.map do |meal|
+                counter = 1
+                meal.meal_food_items.map do |meal_food_item|
+                    food_hash = {counter => []}
+                    hash[:data].push(food_hash)
+                    meal_food_item.food_item.food_item_compounds.map do |food_item_compound|
+                        
+                        add_hash = {:food => food_item_compound.food_item.name,:name => food_item_compound.compound.name, 
+                            :amount => food_item_compound.amount, :rdv =>food_item_compound.compound.rdv, 
+                            :description => food_item_compound.compound.description, :units => food_item_compound.compound.units}
+                    
+                        idx = hash[:data].index {|h| h.has_key?(counter)}
+                        
+                        hash[:data][idx][counter].push(add_hash)
+                            
+                        
+                        end
+                        counter += 1
+                    end
+                    
+                end 
+                render json: hash, status: :accepted
+        else
+            render json: {error: 'User has no meals'}, status: :accepted
+        end
+    end
+
     def get_food
         hash = {total: [], data: []}
        if current_user.meals.size != 0
             all_meals = Meal.where(user_id: current_user.id)
-            if params[:time] == "recent"
-                meals = all_meals.group_by{|meal| Time.now - meal.date}.min.last
-            elsif params[:time] == "week"
+            # if params[:time] == "recent"
+            #     meals = all_meals.group_by{|meal| Time.now - meal.date}.min.last
+            if params[:time] == "week"
                 meals = all_meals.select do |meal|
                     Time.now - meal.date <= 604800
                 end
@@ -48,9 +81,9 @@ class Api::V1::MealsController < ApplicationController
             
 
             meals.map do |meal|
+                counter = 1
                 meal.meal_food_items.map do |meal_food_item|
-                    food_hash = {meal_food_item.id => []}
-                    byebug
+                    food_hash = {counter => []}
                     hash[:data].push(food_hash)
                     meal_food_item.food_item.food_item_compounds.map do |food_item_compound|
                         
@@ -61,24 +94,29 @@ class Api::V1::MealsController < ApplicationController
                             idx = hash[:total].index {|h| h[:name] == food_item_compound.compound.name}
                             hash[:total][idx][:amount] += food_item_compound.amount
                             
-                            idx = hash[:data].index {|h| h.has_key?(food_item_compound.food_item.meal_food_item.id)}
-                            hash[:data][idx][food_item_compound.food_item.meal_food_item.id].push(add_hash)
+                            idx = hash[:data].index {|h| h.has_key?(counter)}
+                            # idx = hash[:data].index {|h| h.has_key?(food_item_compound.food_item.meal_food_item.id)}
+                            hash[:data][idx][counter].push(add_hash)
+                            
                         else
                             hash[:total].push(add_hash)
-                            idx = hash[:data].index {|h| h.has_key?(food_item_compound.food_item.meal_food_item.id)}
+                             idx = hash[:data].index {|h| h.has_key?(counter)}
+
+                            # idx = hash[:data].index {|h| h.has_key?(food_item_compound.food_item.meal_food_item.id)}
                         
-                            hash[:data][idx][food_item_compound.food_item.meal_food_item.id].push(add_hash)
+                            hash[:data][idx][counter].push(add_hash)
                             
                         
                         end
                         
                     end
+                    counter += 1
                 end
             end  
             
             render json: hash, status: :accepted   
         else
-            render json: {error: 'User has no meals'}, status: :not_acceptable
+            render json: {error: 'User has no meals'}, status: :accepted
         end
     end
 
@@ -252,22 +290,26 @@ class Api::V1::MealsController < ApplicationController
         if data["totalHits"] == 0
             render json: {message: "No Meals Found"}, status: :accepted
         else
-            food_id = data["foods"][0]["fdcId"]
-            food_name = data["foods"][0]["description"]
 
-            compounds = [
-                "protein", "fiber, total dietary", "calcium","iron", "iron", "manganese, mn" ,
-                "magnesium, mg", "phosphorus, p", "potassium, k", "sodium, na", "zinc, zn", "copper, cu", 
-                "selenium, se", "vitamin a, iu", "vitamin a, rae", "vitamin e (alpha-tocopherol)", "vitamin_d", "vitamin c, total ascorbic acid", 
-                "thiamin", "riboflavin", "niacin", "vitamin_b5", "vitamin b-6",
-                "vitamin_b12", "choline", "vitamin k (phylloquinone)", "folate, total"]
-        
+            if food_id_index = data["foods"].find_index{|food| food["dataType"] == "SR Legacy"}
+                food_id = data["foods"][food_id_index]["fdcId"]
+            elsif food_id_index = data["foods"].find_index{|food| food["dataType"] == "Survey (FNDDS)"}
+                food_id = data["foods"][food_id_index]["fdcId"]
+            elsif food_id_index = data["foods"].find_index{|food| food["dataType"] == "Foundation"}
+                food_id = data["foods"][food_id_index]["fdcId"]
+            elsif food_id_index = data["foods"].find_index{|food| food["dataType"] == "Branded"}
+                food_id = data["foods"][food_id_index]["fdcId"]
+            else
+                food_id = data["foods"][0]["fdcID"]
+            end
+
+            food_name = data["foods"][food_id_index]["description"]
 
             # nutrient_response = HTTP.headers('Content-Type' => 'application/json').get("https://s79QvmRfTlZsfJLRNGFXVpxRTuozyCnoFrmqMtSJ@api.nal.usda.gov/fdc/v1/#{food_id}")
             nutrient_response = RestClient.get "https://s79QvmRfTlZsfJLRNGFXVpxRTuozyCnoFrmqMtSJ@api.nal.usda.gov/fdc/v1/#{food_id}", {content_type: :json, accept: :json}
 
             @meal = current_user.meals.create(date: Time.now)
-            @food_item = FoodItem.create(name: food_name, food_data_id: food_id)
+            @food_item = food_item_find_or_create(food_name, food_id)
             @meal_food_item = MealFoodItem.create(meal_id: @meal.id, food_item_id: @food_item.id)
 
             nutrient_data = JSON.parse(nutrient_response.body)
@@ -334,6 +376,14 @@ class Api::V1::MealsController < ApplicationController
         else
             @compound = Compound.create(name: name, nutrient_id: id, units: unit)
         end
+    end
+
+    def food_item_find_or_create(name, id)
+        if @food_item = FoodItem.find_by(food_data_id: id)
+        else
+            @food_item = FoodItem.create(name: name, food_data_id: id)
+        end
+        @food_item
     end
 
 end
