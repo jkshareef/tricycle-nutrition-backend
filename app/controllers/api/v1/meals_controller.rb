@@ -87,20 +87,25 @@ class Api::V1::MealsController < ApplicationController
                     hash[:data].push(food_hash)
                     meal_food_item.food_item.food_item_compounds.map do |food_item_compound|
                         
+                        total_hash = {:name => food_item_compound.compound.name, 
+                            :amount => food_item_compound.amount, :rdv =>food_item_compound.compound.rdv, 
+                            :description => food_item_compound.compound.description, :units => food_item_compound.compound.units}
                         add_hash = {:food => food_item_compound.food_item.name,:name => food_item_compound.compound.name, 
                             :amount => food_item_compound.amount, :rdv =>food_item_compound.compound.rdv, 
                             :description => food_item_compound.compound.description, :units => food_item_compound.compound.units}
                         if hash[:total].size > 0 && hash[:total].index {|h| h[:name] == food_item_compound.compound.name} != nil
                             idx = hash[:total].index {|h| h[:name] == food_item_compound.compound.name}
-                            hash[:total][idx][:amount] += food_item_compound.amount
+                            if hash[:total][idx][:amount] != nil
                             
-                            idx = hash[:data].index {|h| h.has_key?(counter)}
-                            # idx = hash[:data].index {|h| h.has_key?(food_item_compound.food_item.meal_food_item.id)}
-                            hash[:data][idx][counter].push(add_hash)
-                            
+                                hash[:total][idx][:amount] += food_item_compound.amount
+                                
+                                idx = hash[:data].index {|h| h.has_key?(counter)}
+                                # idx = hash[:data].index {|h| h.has_key?(food_item_compound.food_item.meal_food_item.id)}
+                                hash[:data][idx][counter].push(add_hash)
+                            end
                         else
-                            hash[:total].push(add_hash)
-                             idx = hash[:data].index {|h| h.has_key?(counter)}
+                            hash[:total].push(total_hash)
+                            idx = hash[:data].index {|h| h.has_key?(counter)}
 
                             # idx = hash[:data].index {|h| h.has_key?(food_item_compound.food_item.meal_food_item.id)}
                         
@@ -129,44 +134,46 @@ class Api::V1::MealsController < ApplicationController
         array = params[:query].split(',')
         food_item_ids = []
         array.each do |food|
-            response = RestClient.post 'https://s79QvmRfTlZsfJLRNGFXVpxRTuozyCnoFrmqMtSJ@api.nal.usda.gov/fdc/v1/search', {'generalSearchInput' => food}.to_json, {content_type: :json, accept: :json}
-            
-            
-            data = JSON.parse(response.body)
+            if food != ''
+                response = RestClient.post 'https://s79QvmRfTlZsfJLRNGFXVpxRTuozyCnoFrmqMtSJ@api.nal.usda.gov/fdc/v1/search', {'generalSearchInput' => food}.to_json, {content_type: :json, accept: :json}
+                
+                
+                data = JSON.parse(response.body)
 
-        
-            if data["totalHits"] == 0
-                render json: {message: "No Meals Found"}, status: :accepted
-            else
-
-                if food_id_index = data["foods"].find_index{|food| food["dataType"] == "SR Legacy"}
-                    food_id = data["foods"][food_id_index]["fdcId"]
-                elsif food_id_index = data["foods"].find_index{|food| food["dataType"] == "Survey (FNDDS)"}
-                    food_id = data["foods"][food_id_index]["fdcId"]
-                elsif food_id_index = data["foods"].find_index{|food| food["dataType"] == "Foundation"}
-                    food_id = data["foods"][food_id_index]["fdcId"]
-                elsif food_id_index = data["foods"].find_index{|food| food["dataType"] == "Branded"}
-                    food_id = data["foods"][food_id_index]["fdcId"]
+            
+                if data["totalHits"] == 0
+                    render json: {message: "No Meals Found"}, status: :accepted
                 else
-                    food_id = data["foods"][0]["fdcID"]
-                end
 
-                food_name = data["foods"][food_id_index]["description"]
+                    if food_id_index = data["foods"].find_index{|food| food["dataType"] == "Survey (FNDDS)"}
+                    food_id = data["foods"][food_id_index]["fdcId"]
+                    elsif food_id_index = data["foods"].find_index{|food| food["dataType"] == "SR Legacy"}
+                        food_id = data["foods"][food_id_index]["fdcId"]
+                    elsif food_id_index = data["foods"].find_index{|food| food["dataType"] == "Foundation"}
+                        food_id = data["foods"][food_id_index]["fdcId"]
+                    elsif food_id_index = data["foods"].find_index{|food| food["dataType"] == "Branded"}
+                        food_id = data["foods"][food_id_index]["fdcId"]
+                    else
+                        food_id = data["foods"][0]["fdcID"]
+                    end
 
-                # nutrient_response = HTTP.headers('Content-Type' => 'application/json').get("https://s79QvmRfTlZsfJLRNGFXVpxRTuozyCnoFrmqMtSJ@api.nal.usda.gov/fdc/v1/#{food_id}")
-                nutrient_response = RestClient.get "https://s79QvmRfTlZsfJLRNGFXVpxRTuozyCnoFrmqMtSJ@api.nal.usda.gov/fdc/v1/#{food_id}", {content_type: :json, accept: :json}
-                @food_item = food_item_find_or_create(food_name, food_id)
-                food_item_ids.push(@food_item.id)
-                nutrient_data = JSON.parse(nutrient_response.body)
-                # result_array = []
-                nutrient_data["foodNutrients"].map do |food_nutrient|
-                        name = food_nutrient["nutrient"]["name"].downcase
-                        id = food_nutrient["nutrient"]["id"]
-                        unit = food_nutrient["nutrient"]["unitName"]
-                        amount = food_nutrient["amount"]
-                        # result_array.push({food_nutrient.nutrient.name.downcase => food_nutrient.nutrient.amount})
-                        @compound = compound_find_or_create(name, id, unit)
-                        FoodItemCompound.create(food_item_id: @food_item.id, compound_id: @compound.id, amount: amount)
+                    food_name = data["foods"][food_id_index]["description"]
+
+                    # nutrient_response = HTTP.headers('Content-Type' => 'application/json').get("https://s79QvmRfTlZsfJLRNGFXVpxRTuozyCnoFrmqMtSJ@api.nal.usda.gov/fdc/v1/#{food_id}")
+                    nutrient_response = RestClient.get "https://s79QvmRfTlZsfJLRNGFXVpxRTuozyCnoFrmqMtSJ@api.nal.usda.gov/fdc/v1/#{food_id}", {content_type: :json, accept: :json}
+                    @food_item = food_item_find_or_create(food_name, food_id)
+                    food_item_ids.push(@food_item.id)
+                    nutrient_data = JSON.parse(nutrient_response.body)
+                    # result_array = []
+                    nutrient_data["foodNutrients"].map do |food_nutrient|
+                            name = food_nutrient["nutrient"]["name"].downcase
+                            id = food_nutrient["nutrient"]["id"]
+                            unit = food_nutrient["nutrient"]["unitName"]
+                            amount = food_nutrient["amount"]
+                            # result_array.push({food_nutrient.nutrient.name.downcase => food_nutrient.nutrient.amount})
+                            @compound = compound_find_or_create(name, id, unit)
+                            FoodItemCompound.create(food_item_id: @food_item.id, compound_id: @compound.id, amount: amount)
+                    end
                 end
             end
         end
