@@ -130,7 +130,7 @@ class Api::V1::MealsController < ApplicationController
     def add_food
         
         # response = HTTP.headers('Content-Type' => 'application/json').post('https://s79QvmRfTlZsfJLRNGFXVpxRTuozyCnoFrmqMtSJ@api.nal.usda.gov/fdc/v1/search', :json => {'generalSearchInput' => params[:query]})
-        byebug
+        
         array = params[:query].split(',')
         food_item_ids = []
         array.each do |food|
@@ -177,13 +177,13 @@ class Api::V1::MealsController < ApplicationController
                 end
             end
         end
-            byebug
+            
             @meal = current_user.meals.create(date: Time.now)
 
             food_item_ids.each do |id|
                 MealFoodItem.create(meal_id: @meal.id, food_item_id: id )
             end
-            byebug
+            
 
             
             render json: {message: 'Success'}, status: :accepted
