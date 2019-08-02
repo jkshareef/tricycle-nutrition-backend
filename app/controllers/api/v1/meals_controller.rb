@@ -221,10 +221,11 @@ class Api::V1::MealsController < ApplicationController
 
     def food_item_find_or_create(name, id)
         if @food_item = FoodItem.find_by(food_data_id: id)
+            @food_item
         else
-            @food_item = FoodItem.create(name: name, food_data_id: id)
+        @food_item = FoodItem.create(name: name, food_data_id: id)
         end
-        @food_item
+       
     end
 
 end

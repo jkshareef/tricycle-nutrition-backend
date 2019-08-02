@@ -15,6 +15,7 @@ class Api::V1::MealFoodItemsController < ApplicationController
             render json: {meal_food_item: MealFoodItemSerializer.new(@meal_food_item)}, status: :accepted
         else
             render json: {error: 'failed to update meal_food_item'}, status: :not_acceptable
+        end
 
     end
 
