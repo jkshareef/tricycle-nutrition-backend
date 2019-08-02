@@ -5,6 +5,7 @@ class Api::V1::FoodItemsController < ApplicationController
             render json: {food_item: FoodItemSerializer.new(@food_item)}, status: :acceptable
         else
             render json: {error: 'failed to create food item'}, status: :not_acceptable
+        end
     end
 
 
