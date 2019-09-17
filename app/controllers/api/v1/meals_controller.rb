@@ -1,5 +1,6 @@
 require 'rest-client'
 require 'aws-sdk-rekognition'
+require 'aws-sdk-s3'
 require 'rmagick'
 require 'base64'
 
@@ -230,6 +231,7 @@ class Api::V1::MealsController < ApplicationController
     # file = File.read(path)
     base64_string = vision_params.base64
     image = Magick::Image.read(base64_string).first
+
     
     attrs = {
       image: {
@@ -273,7 +275,18 @@ class Api::V1::MealsController < ApplicationController
       puts ""
     end
 
-    render json: image, status: :accepted
+    s3 = Aws::S3::Resource.new(region:'us-west-2')
+    bucket = 'tricycle-nutrition-app.images'
+    obj = s3.bucket(bucket).object('key')
+
+    image = Base64.encode64(image)
+
+   
+    obj.put(body: image)
+    
+    
+    render json: { message: 'Success' }, status: :accepted
+
 
   end
   
