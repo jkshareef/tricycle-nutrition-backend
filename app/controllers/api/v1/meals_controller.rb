@@ -275,17 +275,17 @@ class Api::V1::MealsController < ApplicationController
       puts ""
     end
 
-    s3 = Aws::S3::Resource.new(region:'us-west-2')
-    bucket = 'tricycle-nutrition-app.images'
-    obj = s3.bucket(bucket).object('key')
+    # s3 = Aws::S3::Resource.new(region:'us-west-2')
+    # bucket = 'tricycle-nutrition-app.images'
+    # obj = s3.bucket(bucket).object('key')
 
-    image = Base64.encode64(image)
+    # image = Base64.encode64(image)
 
    
-    obj.put(body: image)
+    # obj.put(body: image)
     
     
-    render json: { message: 'Success' }, status: :accepted
+    render json: image, status: :accepted
 
 
   end
