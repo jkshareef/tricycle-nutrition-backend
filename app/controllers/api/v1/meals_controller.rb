@@ -230,7 +230,7 @@ class Api::V1::MealsController < ApplicationController
     # file = File.read(path)
     
     image = Magick::Image.read(base64_string).first
-    puts "#{vision_params.uri}"
+    puts "#{vision_params}"
     
     attrs = {
       image: {
