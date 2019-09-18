@@ -1,5 +1,6 @@
 require 'rest-client'
 require 'aws-sdk-rekognition'
+require 'aws-sdk-s3'
 require 'rmagick'
 require 'base64'
 
@@ -220,24 +221,48 @@ class Api::V1::MealsController < ApplicationController
 
    def computer_vision
  
+    # credentials = Aws::Credentials.new(
+    #    ENV['AWS_ACCESS_KEY_ID'],
+    #    ENV['AWS_SECRET_ACCESS_KEY']
+    # )
+    # client = Aws::Rekognition::Client.new credentials: credentials
+    # # photo = 'photo.jpg'
+    # # path = File.expand_path(photo) # expand path relative to the current directory
+    # # file = File.read(path)
+    # require 'aws-sdk-rekognition'
+    data = vision_params.base64
+
     credentials = Aws::Credentials.new(
-       ENV['AWS_ACCESS_KEY_ID'],
-       ENV['AWS_SECRET_ACCESS_KEY']
+        ENV['AWS_ACCESS_KEY_ID'],
+        ENV['AWS_SECRET_ACCESS_KEY']
     )
-    client = Aws::Rekognition::Client.new credentials: credentials
-    # photo = 'photo.jpg'
-    # path = File.expand_path(photo) # expand path relative to the current directory
-    # file = File.read(path)
-    
-    image = Magick::Image.read(base64_string).first
-    
-    
+
+    s3 = Aws::S3::Resource.new(region:'us-west-2')
+    bucket = 'tricycle-nutrition-app.images'
+    obj = s3.bucket(bucket).object('key')
+
+    obj.put(body: data)
+   
+    # photo  = 'key'# the name of file
+    client   = Aws::Rekognition::Client.new credentials: credentials
     attrs = {
       image: {
-        bytes: vision_params["base64"]
+        s3_object: {
+          bucket: bucket,
+          name: 'key'
+        },
       },
-      max_labels: 10
+      attributes: ['ALL']
     }
+    image = Magick::Image.read_inline(base64_string).first
+    
+    
+    # attrs = {
+    #   image: {
+    #     bytes: vision_params["base64"]
+    #   },
+    #   max_labels: 10
+    # }
 
     response = client.detect_labels attrs
     puts "Detected labels for photo"
