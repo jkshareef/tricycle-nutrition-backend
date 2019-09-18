@@ -228,13 +228,13 @@ class Api::V1::MealsController < ApplicationController
     # photo = 'photo.jpg'
     # path = File.expand_path(photo) # expand path relative to the current directory
     # file = File.read(path)
-    base64_string = vision_params.base64
+    
     image = Magick::Image.read(base64_string).first
-
+    puts "#{vision_params.uri}"
     
     attrs = {
       image: {
-        bytes: base64_string
+        bytes: vision_params["base64"]
       },
       max_labels: 10
     }
