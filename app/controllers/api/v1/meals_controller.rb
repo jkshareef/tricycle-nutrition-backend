@@ -234,7 +234,7 @@ class Api::V1::MealsController < ApplicationController
     
     attrs = {
       image: {
-        bytes: ""
+        bytes: vision_params["base64"]
       },
       max_labels: 10
     }
