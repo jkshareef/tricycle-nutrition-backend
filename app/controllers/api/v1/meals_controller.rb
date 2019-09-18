@@ -1,6 +1,5 @@
 require 'rest-client'
 require 'aws-sdk-rekognition'
-require 'aws-sdk-s3'
 require 'rmagick'
 require 'base64'
 
