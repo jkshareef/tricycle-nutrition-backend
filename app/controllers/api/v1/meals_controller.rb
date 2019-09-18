@@ -240,7 +240,7 @@ class Api::V1::MealsController < ApplicationController
     }
 
     response = client.detect_labels attrs
-    puts "Detected labels for: #{photo}"
+    puts "Detected labels for photo"
     response.labels.each do |label|
       
       puts "Label:      #{label.name}"
@@ -278,11 +278,11 @@ class Api::V1::MealsController < ApplicationController
     # bucket = 'tricycle-nutrition-app.images'
     # obj = s3.bucket(bucket).object('key')
 
-    # image = Base64.encode64(image)
+   
 
    
     # obj.put(body: image)
-    
+     image = Base64.encode64(image)
     
     render json: image, status: :accepted
 
