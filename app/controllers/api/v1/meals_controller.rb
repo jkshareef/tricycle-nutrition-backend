@@ -3,6 +3,7 @@ require 'aws-sdk-rekognition'
 require 'aws-sdk-s3'
 require 'rmagick'
 require 'base64'
+require 'pry'
 
 class Api::V1::MealsController < ApplicationController
   def create
@@ -232,7 +233,7 @@ class Api::V1::MealsController < ApplicationController
     # # file = File.read(path)
     # require 'aws-sdk-rekognition'
     data = vision_params.base64
-    byebug
+    binding.pry
     
 
     credentials = Aws::Credentials.new(

@@ -53,6 +53,7 @@ gem "faker", "~> 1.9"
 gem 'aws-sdk-rails'
 gem 'aws-sdk', '~> 3'
 gem 'aws-sdk-rekognition'
+gem 'pry', '~> 0.10.3'
 gem 'rmagick', '~> 2.15', '>= 2.15.4'
 gem 'rest-client', '~> 2.0', '>= 2.0.2'
 gem 'parallel', '~> 1.17'
