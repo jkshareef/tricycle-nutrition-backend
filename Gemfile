@@ -51,6 +51,7 @@ gem "jwt", "~> 2.2"
 
 gem "faker", "~> 1.9"
 gem 'aws-sdk-rails'
+
 gem 'aws-sdk-rekognition'
 gem 'rmagick', '~> 2.15', '>= 2.15.4'
 gem 'rest-client', '~> 2.0', '>= 2.0.2'
