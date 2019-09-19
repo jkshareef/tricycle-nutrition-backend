@@ -233,7 +233,7 @@ class Api::V1::MealsController < ApplicationController
     # # file = File.read(path)
     # require 'aws-sdk-rekognition'
     data = vision_params.base64
-    binding.pry
+    puts "#{vision_params}"
     
 
     credentials = Aws::Credentials.new(
