@@ -220,7 +220,8 @@ class Api::V1::MealsController < ApplicationController
   end
 
    def computer_vision
- 
+    
+
     # credentials = Aws::Credentials.new(
     #    ENV['AWS_ACCESS_KEY_ID'],
     #    ENV['AWS_SECRET_ACCESS_KEY']
@@ -231,6 +232,8 @@ class Api::V1::MealsController < ApplicationController
     # # file = File.read(path)
     # require 'aws-sdk-rekognition'
     data = vision_params.base64
+    byebug
+    
 
     credentials = Aws::Credentials.new(
         ENV['AWS_ACCESS_KEY_ID'],
