@@ -14,8 +14,8 @@ Rails.application.routes.draw do
       get '/food/recent', to: 'meals#get_recent'
       get '/food/:time', to: 'meals#get_food'
       post '/add/:query', to: 'meals#add_food'
-      get '/foodnames', to: "food_items#food_names"
-      post '/photo', to: "meals#computer_vision"
+      get '/foodnames', to: 'food_items#food_names'
+      post '/photo', to: 'photos#computer_vision'
     end
   end
 end
