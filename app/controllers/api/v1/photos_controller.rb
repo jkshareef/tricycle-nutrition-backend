@@ -38,7 +38,7 @@ class Api::V1::PhotosController < ApplicationController
     
 
     obj.put(body: Base64.decode64(@photo.base64))
-
+      
     image = Magick::Image.read_inline(@photo.base64).first
 
     # photo  = 'key'# the name of file
