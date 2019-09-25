@@ -8,15 +8,6 @@ class Api::V1::PhotosController < ApplicationController
 
   def computer_vision
     @photo = Photo.create(vision_params)
-    # credentials = Aws::Credentials.new(
-    #    ENV['AWS_ACCESS_KEY_ID'],
-    #    ENV['AWS_SECRET_ACCESS_KEY']
-    # )
-    # client = Aws::Rekognition::Client.new credentials: credentials
-    # # photo = 'photo.jpg'
-    # # path = File.expand_path(photo) # expand path relative to the current directory
-    # # file = File.read(path)
-    # require 'aws-sdk-rekognition'
 
     credentials =
       Aws::Credentials.new(
@@ -28,20 +19,10 @@ class Api::V1::PhotosController < ApplicationController
     bucket = 'tricycle-nutrition-app.images'
     obj = s3.bucket(bucket).object('temp.jpg')
 
-    # var data = {
-    #     Key: req.body.userId, 
-    #     Body: buf,
-    #     ContentEncoding: 'base64',
-    #     ContentType: 'image/jpeg'
-    #   };
-
-    
-
     obj.put(body: Base64.decode64(@photo.base64))
-      
+
     image = Magick::Image.read_inline(@photo.base64).first
 
-    # photo  = 'key'# the name of file
     client = Aws::Rekognition::Client.new credentials: credentials
     attrs = {
         image: {
@@ -52,13 +33,6 @@ class Api::V1::PhotosController < ApplicationController
         },
           max_labels: 10
       }
-
-    # attrs = {
-    #   image: {
-    #     bytes: vision_params["base64"]
-    #   },
-    #   max_labels: 10
-    # }
 
     response = client.detect_labels attrs
     puts 'Detected labels for photo'
@@ -90,12 +64,7 @@ class Api::V1::PhotosController < ApplicationController
       puts '------------'
       puts ''
     end
-
-    # s3 = Aws::S3::Resource.new(region:'us-west-2')
-    # bucket = 'tricycle-nutrition-app.images'
-    # obj = s3.bucket(bucket).object('key')
-
-    # obj.put(body: image)
+    
     image = Base64.encode64(image)
 
     render json: image, status: :accepted

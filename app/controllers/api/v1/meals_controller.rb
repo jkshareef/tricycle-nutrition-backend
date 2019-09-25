@@ -114,15 +114,11 @@ class Api::V1::MealsController < ApplicationController
                 hash[:total][idx][:amount] += food_item_compound.amount
 
                 idx = hash[:data].index { |h| h.has_key?(counter) }
-                # idx = hash[:data].index {|h| h.has_key?(food_item_compound.food_item.meal_food_item.id)}
                 hash[:data][idx][counter].push(add_hash)
               end
             else
               hash[:total].push(total_hash)
               idx = hash[:data].index { |h| h.has_key?(counter) }
-
-              # idx = hash[:data].index {|h| h.has_key?(food_item_compound.food_item.meal_food_item.id)}
-
               hash[:data][idx][counter].push(add_hash)
             end
           end
